@@ -2,6 +2,11 @@
 
 ### **Nombre del estudiante:** Mauricio David Correa H.
 
+# Tabla de Contenido  
+<!-- TOC -->  
+<!-- /TOC -->  
+
+
 ## 1. Conocimiento teórico de la rotación de una imagen.
 
 La rotación de imágenes es una de las transformaciones geométricas más utilizadas en el procesamiento digital de imágenes. Se emplea en diversas aplicaciones, como la alineación de imágenes, el reconocimiento de patrones y la visión por computadora.
