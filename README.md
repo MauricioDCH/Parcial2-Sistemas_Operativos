@@ -2,12 +2,52 @@
 
 ### **Nombre del estudiante:** Mauricio David Correa H.
 
-# Tabla de Contenido  
-<!-- TOC -->  
-<!-- /TOC -->  
+# Tabla de Contenido.
+
+- [1. Conocimiento teórico de la rotación de una imagen.](#1-conocimiento-teórico-de-la-rotación-de-una-imagen)
+    - [1. Transformación Directa.](#1-transformación-directa)
+    - [2. Transformación Inversa.](#2-transformación-inversa)
+    - [3. Por qué la transformación inversa es mejor](#3-por-qué-la-transformación-inversa-es-mejor)
+
+- [2. Conocimiento teórico del escalamiento de una imagen utilizando Interpolación Bilineal.](#2-conocimiento-teórico-del-escalamiento-de-una-imagen-utilizando-interpolación-bilineal)
+    - [1. Transformación de escalamiento.](#1-transformación-de-escalamiento)
+    - [2. Interpolación Bilineal](#2-interpolación-bilineal)
+    - [3. Ventajas de la Interpolación Bilineal.](#3-ventajas-de-la-interpolación-bilineal)
+    - [4. Desventajas.](#4-desventajas)
+
+- [3. Preguntas de análisis.](#3-preguntas-de-análisis)
+    - [1. Qué diferencia observaste en el tiempo de procesamiento entre los dos modos de asignación de memoria](#1-qué-diferencia-observaste-en-el-tiempo-de-procesamiento-entre-los-dos-modos-de-asignación-de-memoria)
+
+    - [2. Cuál fue el impacto del tamaño de la imagen en el consumo de memoria y el rendimiento.](#2-cuál-fue-el-impacto-del-tamaño-de-la-imagen-en-el-consumo-de-memoria-y-el-rendimiento)
+
+    - [3. Por qué el Buddy System es más eficiente o menos eficiente que el uso de new/delete en este caso.](#3-por-qué-el-buddy-system-es-más-eficiente-o-menos-eficiente-que-el-uso-de-newdelete-en-este-caso)
+
+    - [4. Cómo podrías optimizar el uso de memoria y tiempo de procesamiento en este programa.](#4-cómo-podrías-optimizar-el-uso-de-memoria-y-tiempo-de-procesamiento-en-este-programa)
+
+    - [5. Qué implicaciones podría tener esta solución en sistemas con limitaciones de memoria o en dispositivos embebidos.](#5-qué-implicaciones-podría-tener-esta-solución-en-sistemas-con-limitaciones-de-memoria-o-en-dispositivos-embebidos)
+
+    - [6. Cómo afectaría el aumento de canales (por ejemplo, de RGB a RGBA) en el rendimiento y consumo de memoria.](#6-cómo-afectaría-el-aumento-de-canales-por-ejemplo-de-rgb-a-rgba-en-el-rendimiento-y-consumo-de-memoria)
+
+    - [7. Qué ventajas y desventajas tiene el Buddy System frente a otras técnicas de gestión de memoria en proyectos de procesamiento de imágenes.](#7-qué-ventajas-y-desventajas-tiene-el-buddy-system-frente-a-otras-técnicas-de-gestión-de-memoria-en-proyectos-de-procesamiento-de-imágenes)
+
+- [4. Código.](#4-código)
+    - [4.1. Buddy Allocator.](#41-buddy-allocator)
+    - [4.2. Image.](#42-image)
+    - [4.3. Measure Memory and Time.](#43-measure-memory-and-time)
+    - [4.4. Process Image.](#44-process-image)
+    - [4.5. Stb.](#45-stb)
+    - [4.6. Utils.](#46-utils)
+    - [4.7. Main.](#47-main)
+    - [4.8. Makefile.](#48-makefile)
+
+- [5. Compilación y ejecución.](#5-compilación-y-ejecución)
+    - [Compilación.](#compilación)
+    - [Ejecución.](#ejecución)
+
+- [Video sustentación Parcial 2 - Sistemas Operativos](#6-video-sustentación-parcial-2---sistemas-operativos)
 
 
-## 1. Conocimiento teórico de la rotación de una imagen.
+## **1. Conocimiento teórico de la rotación de una imagen.**
 
 La rotación de imágenes es una de las transformaciones geométricas más utilizadas en el procesamiento digital de imágenes. Se emplea en diversas aplicaciones, como la alineación de imágenes, el reconocimiento de patrones y la visión por computadora.
 
@@ -23,11 +63,6 @@ La transformación inversa es preferida en la mayoría de los casos, ya que evit
 ![rotacion-imagen](./readme-images/rotacion-imagen.png)
 
 ***Figura 1: Rotación desde el centro de una imagen.***
-
-
-### **Cómo se llega a la transformación inversa en rotación de imágenes**
-
----
 
 #### **1. Transformación Directa.**
 
@@ -96,20 +131,20 @@ $$
 y_{\text{original}} = (x'' - x_{centro}) \sin(\theta) + (y'' - y_{centro}) \cos(\theta) + y_{centro}
 $$
 
-### 3. ¿Por qué la transformación inversa es mejor?
+#### **3. Por qué la transformación inversa es mejor.**
 Cuando recorremos la imagen destino y usamos la transformación inversa, evitamos los problemas de la transformación directa:
 
 - No hay huecos porque cada píxel en la imagen rotada recibe un valor.
 - Interpolación bilineal se puede aplicar si el resultado de 
 $(𝑥_{original},𝑦_{original})$ no es un píxel exacto.
 
-## 2. Conocimiento teórico del escalamiento de una imagen utilizando Interpolación Bilineal.
+## **2. Conocimiento teórico del escalamiento de una imagen utilizando Interpolación Bilineal.**
 
 El escalamiento de imágenes es una operación fundamental en el procesamiento digital de imágenes, utilizada en aplicaciones como la compresión de imágenes, la visualización en diferentes resoluciones y la mejora de detalles en la visión por computadora.
 
 El proceso de escalamiento implica cambiar el tamaño de una imagen aumentando o reduciendo su número de píxeles. Sin embargo, este cambio no es trivial, ya que una ampliación sin interpolación puede generar pérdida de detalles y una reducción sin un filtrado adecuado puede producir aliasing.
 
-### **Transformación de escalamiento**
+### **1. Transformación de escalamiento.**
 El escalamiento en coordenadas $(x, y)$ de una imagen se define por:
 
 $$
@@ -123,7 +158,7 @@ donde $S_x$ y $S_y$ son los factores de escalamiento en los ejes horizontal y ve
 
 El problema principal del escalamiento es la asignación de valores de píxeles cuando la imagen se redimensiona. Si el nuevo tamaño de la imagen no coincide exactamente con una relación de enteros, es necesario interpolar valores de píxeles.
 
-### **Interpolación Bilineal**
+### **2. Interpolación Bilineal.**
 La interpolación bilineal es una técnica común para calcular el valor de un píxel en una imagen escalada. En lugar de simplemente tomar el valor del píxel más cercano (como en la interpolación del vecino más próximo), la interpolación bilineal utiliza un promedio ponderado de los cuatro píxeles más cercanos para calcular un valor suavizado.
 
 Dado un punto $(x', y')$ en la imagen escalada, la interpolación bilineal encuentra los cuatro píxeles vecinos $(x_1, y_1)$, $(x_2, y_1)$, $(x_1, y_2)$ y $(x_2, y_2)$ en la imagen original, y calcula el valor interpolado como:
@@ -138,12 +173,12 @@ donde:
 
 Este método proporciona una transición suave entre los píxeles y reduce el efecto de pixelación en la imagen escalada.
 
-### **Ventajas de la Interpolación Bilineal**
+### **3. Ventajas de la Interpolación Bilineal.**
 - Produce una imagen más suave en comparación con la interpolación del vecino más próximo.
 - Reduce los artefactos visuales en la imagen escalada.
 - Se puede calcular rápidamente en hardware gráfico y es eficiente para el procesamiento en tiempo real.
 
-### **Desventajas**
+### **4. Desventajas.**
 - Puede generar un ligero desenfoque en la imagen debido al promedio de valores de píxeles.
 - No conserva detalles finos en comparación con métodos más avanzados como la interpolación bicúbica.
 
@@ -155,7 +190,7 @@ Este conocimiento teórico sienta las bases para la implementación del escalami
 
 ## 3. Preguntas de análisis.
 
-### 1.  ¿Qué diferencia observaste en el tiempo de procesamiento entre los dos modos de asignación de memoria? 
+### 1. Qué diferencia observaste en el tiempo de procesamiento entre los dos modos de asignación de memoria.
 
 El tiempo de procesamiento depende de cómo se maneja la memoria en cada caso:
 
@@ -165,7 +200,7 @@ El tiempo de procesamiento depende de cómo se maneja la memoria en cada caso:
 
 En general, el Buddy System suele ser más rápido para la gestión de memoria dinámica en casos donde se realizan múltiples asignaciones y liberaciones.
 
-### 2.  ¿Cuál fue el impacto del tamaño de la imagen en el consumo de memoria y el rendimiento? 
+### 2. Cuál fue el impacto del tamaño de la imagen en el consumo de memoria y el rendimiento.
 
 * A medida que el tamaño de la imagen aumenta, el consumo de memoria también crece de manera proporcional.
 
@@ -175,7 +210,7 @@ En general, el Buddy System suele ser más rápido para la gestión de memoria d
 
 * En términos de rendimiento, el procesamiento de imágenes más grandes implica más operaciones de interpolación y transformación, lo que incrementa el tiempo de ejecución.
 
-### 3.  ¿Por qué el Buddy System es más eficiente o menos eficiente que el uso de new/delete en este caso? 
+### 3. Por qué el Buddy System es más eficiente o menos eficiente que el uso de new/delete en este caso.
 
 El Buddy System es más eficiente en la gestión de memoria porque:
 * Reduce la fragmentación externa al dividir la memoria en bloques de tamaños predefinidos.
@@ -186,7 +221,7 @@ Sin embargo, puede ser menos eficiente en algunos casos porque:
 * Puede desperdiciar memoria cuando los bloques asignados son más grandes de lo necesario (fragmentación interna).
 * No es tan flexible como new/delete en situaciones donde los tamaños de memoria no encajan bien en la jerarquía del sistema.
 
-### 4.  ¿Cómo podrías optimizar el uso de memoria y tiempo de procesamiento en este programa? 
+### 4. Cómo podrías optimizar el uso de memoria y tiempo de procesamiento en este programa.
 
 Algunas estrategias de optimización incluyen:
 
@@ -200,7 +235,7 @@ Algunas estrategias de optimización incluyen:
 
 * **Liberación eficiente de memoria:** Implementar un sistema de reutilización de bloques en lugar de asignar y liberar constantemente.
 
-### 5.  ¿Qué implicaciones podría tener esta solución en sistemas con limitaciones de memoria o en dispositivos embebidos? 
+### 5. Qué implicaciones podría tener esta solución en sistemas con limitaciones de memoria o en dispositivos embebidos.
 
 En sistemas con recursos limitados, como dispositivos embebidos, se deben considerar varios factores:
 
@@ -214,7 +249,7 @@ En sistemas con recursos limitados, como dispositivos embebidos, se deben consid
 
 En general, es recomendable ajustar los tamaños de los bloques del Buddy System para minimizar desperdicios y evitar asignaciones innecesarias en estos entornos.
 
-### 6.  ¿Cómo afectaría el aumento de canales (por ejemplo, de RGB a RGBA) en el rendimiento y consumo de memoria? 
+### 6. Cómo afectaría el aumento de canales (por ejemplo, de RGB a RGBA) en el rendimiento y consumo de memoria.
 
 * **Consumo de memoria:** Aumenta un 33% al agregar un canal alfa (de 3 a 4 bytes por píxel). Esto significa que una imagen de 1920x1080 pasaría de consumir ~6.2 MB a ~8.3 MB.
 
@@ -224,7 +259,7 @@ En general, es recomendable ajustar los tamaños de los bloques del Buddy System
 
 Para mitigar estos efectos, se pueden utilizar estructuras de datos optimizadas y técnicas como procesamiento vectorizado (SIMD) para mejorar la manipulación de píxeles.
 
-### 7.  ¿Qué ventajas y desventajas tiene el Buddy System frente a otras técnicas de gestión de memoria en proyectos de procesamiento de imágenes?
+### 7. Qué ventajas y desventajas tiene el Buddy System frente a otras técnicas de gestión de memoria en proyectos de procesamiento de imágenes.
 
 | **Técnica** | **Ventajas** | **Desventajas** |
 |------------|-------------|----------------|
@@ -1855,3 +1890,7 @@ $ make run-buddy
 | THANKS FOR USE THE IMAGE PROCESSOR.
 |=============================================================================================
 ```
+
+## 6. Video sustentación Parcial 2 - Sistemas Operativos.
+
+[Link del video sustentación Parcial 2 - Sistemas Operativos.](https://eafit-my.sharepoint.com/personal/mdcorreah_eafit_edu_co/_layouts/15/stream.aspx?id=%2Fpersonal%2Fmdcorreah%5Feafit%5Fedu%5Fco%2FDocuments%2FGrabaciones%2FVideo%20sustentaci%C3%B3n%20Parcial%202%20%2D%20Sistemas%20Operativos%2D20250327%5F194357%2DMeeting%20Recording%2Emp4&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2E8b6444ef%2D9c92%2D4994%2D92f7%2D5604490d8b49&isDarkMode=false)
